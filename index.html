@@ -96,6 +96,7 @@ function toast(m){const t=document.createElement('div');t.className='toast';t.te
 
 /* ===== 저장소 ===== */
 const LS='carapp.v1';
+const DEFAULT_URL='https://script.google.com/macros/s/AKfycbxYzD_nxhN9vFvWTnHt5Gk5YXmq8qUW427PvrvwUyFfQVBPrgPw5TPfn2DFXcuCYqjVag/exec';
 const TYPES=['maint','fuel','odo','ins','cfg'];
 let S;
 try{S=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){S=null}
@@ -219,7 +220,7 @@ function schedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(doSync,1200); 
 function dirtyCount(){let c=0;TYPES.forEach(t=>Object.values(S.rec[t]).forEach(r=>{if(r._dirty)c++}));return c}
 function setSyncLabel(){
   const el=$('#sync'); if(!el)return;
-  if(!S.conn.url) el.textContent='○ 이 폰에만 저장';
+  if(!S.conn.key) el.textContent='○ 이 폰에만 저장';
   else if(syncing) el.textContent='⟳ 동기화 중';
   else if(!navigator.onLine) el.textContent='○ 오프라인 ('+dirtyCount()+'건 대기)';
   else if(syncMsg) el.textContent='! '+syncMsg;
@@ -233,13 +234,13 @@ function fixDates(r){
   }
 }
 async function doSync(manual){
-  if(!S.conn.url||!S.conn.key||syncing) return;
+  if(!S.conn.key||syncing) return;
   if(!navigator.onLine){setSyncLabel();return}
   syncing=true; syncMsg=''; setSyncLabel();
   try{
     const records={}; const sent=[];
     TYPES.forEach(t=>{records[t]=Object.values(S.rec[t]).filter(r=>r._dirty).map(r=>{sent.push([t,r.id,r.updatedAt]);const o={};for(const k in r){if(k[0]!=='_')o[k]=r[k]}return o});});
-    const resp=await fetch(S.conn.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:S.conn.key,since:S.since,records})});
+    const resp=await fetch(S.conn.url||DEFAULT_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:S.conn.key,since:S.since,records})});
     const j=await resp.json();
     if(!j.ok) throw new Error(j.error==='auth'?'접속 코드가 맞지 않아요':j.error);
     sent.forEach(([t,id,ts])=>{const r=S.rec[t][id]; if(r&&r.updatedAt===ts) delete r._dirty;});
@@ -251,7 +252,7 @@ async function doSync(manual){
     }));
     S.since=j.now; save();
     if(manual) toast('동기화 완료');
-  }catch(e){ syncMsg=(e.message||'동기화 실패').slice(0,24); if(manual) toast('동기화 실패: '+e.message); }
+  }catch(e){ if(/접속 코드/.test(e.message||'')){S.conn.key='';save();} syncMsg=(e.message||'동기화 실패').slice(0,24); if(manual) toast('동기화 실패: '+e.message); }
   syncing=false; setSyncLabel(); render();
 }
 
@@ -313,6 +314,7 @@ function bind(){
     else if(a==='yr'){statYear+=Number(el.dataset.d);render()}
     else if(a==='add')({maint:formMaint,fuel:formFuel,odo:formOdo,ins:formIns}[tab])();
     else if(a==='addwork')formMaint({work:el.dataset.w});
+    else if(a==='code'){const v=($('#codeIn').value||'').trim(); if(!v){toast('코드를 입력하세요');return} S.conn.key=v; S.conn.url=DEFAULT_URL; save(); render(); doSync(true);}
     else if(a==='rcpt')$('#rfile').click();
     else if(a==='paste')formPaste();
     else if(a==='trip')formTrip();
@@ -322,6 +324,7 @@ function bind(){
 function vHome(){
   const cur=curOdo(), avg=avgDaily(), c=cfg();
   let h='';
+  if(!S.conn.key)h+=`<div class="card"><h2>공유 연결</h2><div class="sub">배우자와 같은 기록을 보려면 접속 코드를 입력하세요. (카톡으로 받은 코드)</div><input id="codeIn" placeholder="접속 코드" autocapitalize="off" autocomplete="off" style="margin-top:8px"><div class="btns"><button class="pri" data-act="code">연결하기</button></div></div>`;
   // 현재 주행거리
   if(cur){
     const ageDays=daysBetween(cur.date,today());
@@ -574,7 +577,7 @@ function formSettings(){
   <div class="row" style="margin-top:8px"><button class="sec sm" id="s_rst">기본값으로</button><span class="sub">기본값은 쉐보레 사이트 예상치 기준이에요. 매뉴얼에 맞게 고쳐 쓰세요.</span></div>
   <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
   <b>공유 연결 (Google 시트)</b>
-  <label>웹앱 주소</label><input id="s_url" value="${esc(S.conn.url)}" placeholder="https://script.google.com/macros/s/.../exec">
+  <label>웹앱 주소</label><input id="s_url" value="${esc(S.conn.url||DEFAULT_URL)}" placeholder="https://script.google.com/macros/s/.../exec">
   <label>접속 코드</label><input id="s_key" value="${esc(S.conn.key)}">
   <div class="row" style="margin-top:8px"><button class="sec" id="s_link">배우자에게 보낼 설정 링크 복사</button></div>
   <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
@@ -647,14 +650,16 @@ window.carApp={importMaint,put,list,S:()=>S,setCurKm,saveCfg,doSync,curOdo,avgDa
 
 /* ===== 시작 ===== */
 $('#btnSet').onclick=formSettings;
-$('#btnSync').onclick=()=>S.conn.url?doSync(true):formSettings();
+$('#btnSync').onclick=()=>S.conn.key?doSync(true):formSettings();
 addEventListener('online',()=>doSync());
 addEventListener('offline',setSyncLabel);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)doSync()});
 setInterval(()=>{if(!document.hidden)doSync()},90000);
 (function init(){
-  const m=location.hash.match(/#setup=(.+)$/);
-  if(m){ try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1]))));S.conn.url=o.u;S.conn.key=o.k;save();history.replaceState(null,'',location.pathname);setTimeout(()=>toast('공유 설정이 완료됐어요'),400)}catch(e){} }
+  let m=location.hash.match(/#setup=(.+)$/);
+  const km=location.hash.match(/#k=([A-Za-z0-9]+)/);
+  if(km){S.conn.key=km[1];S.conn.url=DEFAULT_URL;save();history.replaceState(null,'',location.pathname);setTimeout(()=>toast('공유 설정이 완료됐어요'),400);}
+  else if(m){ try{let b=m[1];try{b=decodeURIComponent(b)}catch(e){} b=b.replace(/-/g,'+').replace(/_/g,'/').replace(/[^A-Za-z0-9+\/=]/g,''); while(b.length%4)b+='=';const o=JSON.parse(decodeURIComponent(escape(atob(b))));S.conn.url=o.u;S.conn.key=o.k;save();history.replaceState(null,'',location.pathname);setTimeout(()=>toast('공유 설정이 완료됐어요'),400)}catch(e){} }
   render(); doSync();
   if(/[?&]shared=1/.test(location.search)){ history.replaceState(null,'',location.pathname); handleShared(); }
   if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
