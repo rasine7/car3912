@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#7c3aed">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>3912</title>
+<style>
+:root{--bg:#f3f5f9;--card:#fff;--tx:#1b2430;--sub:#6b7686;--pri:#7c3aed;--ok:#16a34a;--warn:#d97706;--bad:#dc2626;--line:#e4e8ef}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 -apple-system,"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+header{position:sticky;top:0;z-index:5;background:var(--pri);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;display:flex;align-items:center;gap:8px}
+header h1{font-size:17px;margin:0;flex:1}
+header button{background:rgba(255,255,255,.18);color:#fff;border:0;border-radius:8px;padding:6px 10px;font-size:13px}
+#sync{font-size:12px;opacity:.95}
+main{padding:12px;max-width:720px;margin:0 auto}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.card h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;justify-content:space-between}
+.big{font-size:34px;font-weight:700;letter-spacing:-.5px}
+.sub{color:var(--sub);font-size:13px}
+.row{display:flex;gap:8px;align-items:center}
+.sp{flex:1}
+button.pri{background:var(--pri);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-size:15px}
+button.sec{background:#f1ebfd;color:var(--pri);border:0;border-radius:10px;padding:9px 12px;font-size:14px}
+button.dan{background:#fee2e2;color:var(--bad);border:0;border-radius:10px;padding:10px 14px;font-size:15px}
+button.sm{padding:5px 9px;font-size:13px;border-radius:8px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+.b-ok{background:#dcfce7;color:var(--ok)}.b-soon{background:#fef3c7;color:var(--warn)}.b-over{background:#fee2e2;color:var(--bad)}.b-none{background:#e5e7eb;color:#4b5563}
+.item{padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item .t{display:flex;align-items:center;gap:8px;font-weight:600}
+.list .it{padding:10px 0;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-start}
+.list .it:first-child{border-top:0}
+.list .it .m{flex:1;min-width:0}
+.list .it .r{text-align:right;white-space:nowrap}
+.alert{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:8px 10px;margin-bottom:6px;font-size:14px}
+.alert.red{background:#fef2f2;border-color:#fecaca}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:6}
+nav button{flex:1;background:none;border:0;padding:9px 0 8px;font-size:12px;color:var(--sub)}
+nav button b{display:block;font-size:19px;font-weight:400}
+nav button.on{color:var(--pri);font-weight:700}
+.fab{position:fixed;right:16px;bottom:calc(78px + env(safe-area-inset-bottom));background:var(--pri);color:#fff;border:0;border-radius:99px;padding:13px 20px;font-size:15px;box-shadow:0 4px 12px rgba(124,58,237,.4);z-index:6}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:none;align-items:flex-end;justify-content:center}
+#modal.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:720px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--sub);margin:10px 0 3px}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid #cfd6e2;border-radius:10px;background:#fff}
+input[type=checkbox]{width:auto;margin-right:6px}
+.chk{display:flex;align-items:center;margin-top:12px;color:var(--tx);font-size:15px}
+.btns{display:flex;gap:8px;margin-top:16px}
+.btns .pri{flex:1}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px;margin:8px 0 2px}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+.bar i{display:block;width:100%}
+.bar span{font-size:10px;color:var(--sub);text-align:center;margin-top:2px}
+.lg{display:flex;gap:12px;font-size:12px;color:var(--sub);margin-top:6px;flex-wrap:wrap}
+.lg u{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;text-decoration:none}
+.c-fuel{background:#3b82f6}.c-maint{background:#f59e0b}.c-ins{background:#8b5cf6}
+.kv{display:flex;justify-content:space-between;padding:4px 0}
+.empty{color:var(--sub);text-align:center;padding:24px 0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:#111c;color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;z-index:30}
+.note{font-size:12px;color:var(--sub);margin-top:6px}
+</style>
+</head>
+<body>
+<header><h1>🚙 3912</h1><span id="sync"></span><button id="btnSync">⟳</button><button id="btnSet">⚙︎</button></header>
+<main id="main"></main>
+<button class="fab" id="fab" style="display:none">+ 추가</button>
+<nav id="nav"></nav>
+<div id="modal"></div>
+
+<script>
+'use strict';
+/* ===== 유틸 ===== */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n0=x=>(Number(x)||0).toLocaleString('ko-KR');
+const won=x=>n0(Math.round(x))+'원';
+const pad=n=>String(n).padStart(2,'0');
+const isoOf=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>isoOf(new Date());
+const dnum=iso=>{const [y,m,d]=iso.split('-').map(Number);return Math.round(Date.UTC(y,m-1,d)/86400000)};
+const fromDnum=n=>{const d=new Date(n*86400000);return d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate())};
+const daysBetween=(a,b)=>dnum(b)-dnum(a);
+const addMonths=(iso,m)=>{const [y,mo,d]=iso.split('-').map(Number);const t=new Date(Date.UTC(y,mo-1+m,1));const last=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0)).getUTCDate();return t.getUTCFullYear()+'-'+pad(t.getUTCMonth()+1)+'-'+pad(Math.min(d,last))};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const normWork=s=>String(s||'').replace(/[\s\u3000]+/g,' ').replace(/（/g,'(').replace(/）/g,')').trim();
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2200)}
+
+/* ===== 저장소 ===== */
+const LS='carapp.v1';
+const TYPES=['maint','fuel','odo','ins','cfg'];
+let S;
+try{S=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){S=null}
+if(!S){S={rec:{},since:0,conn:{url:'',key:''}}}
+TYPES.forEach(t=>S.rec[t]=S.rec[t]||{});
+const save=()=>localStorage.setItem(LS,JSON.stringify(S));
+const list=t=>Object.values(S.rec[t]).filter(r=>!r.deleted);
+function put(t,o){
+  o.id=o.id||uid(); o.updatedAt=Date.now(); o._dirty=1;
+  S.rec[t][o.id]=o; save(); schedSync(); return o;
+}
+function del(t,id){const r=S.rec[t][id]; if(!r)return; r.deleted=1; r.updatedAt=Date.now(); r._dirty=1; save(); schedSync()}
+
+/* ===== 기본 정비 항목 (설정에서 수정) ===== */
+const DEF_ITEMS=[
+ {name:'엔진오일',kw:'엔진오일',km:10000,mo:12},
+ {name:'에어컨(캐빈) 필터',kw:'에어컨.*필터|캐빈',km:10000,mo:12},
+ {name:'타이어 위치교환',kw:'타이어 ?위치',km:10000,mo:0},
+ {name:'브레이크오일',kw:'브레이크 ?오일',km:60000,mo:24},
+ {name:'점화플러그',kw:'점화플러그|스파크플러그',km:60000,mo:0},
+ {name:'변속기오일',kw:'오토밋션오일|오토미션오일|변속기오일|ATF',km:160000,mo:0},
+ {name:'냉각수(부동액)',kw:'부동액|냉각수',km:240000,mo:0}
+];
+const WARN_KM=1000, WARN_DAYS=30;
+function cfg(){
+  const c=S.rec.cfg.main||{};
+  let items; try{items=JSON.parse(c.items)}catch(e){}
+  if(!Array.isArray(items)||!items.length) items=DEF_ITEMS;
+  return {items,carName:c.carName||'',built:c.built||''};
+}
+function saveCfg(patch){
+  const c=Object.assign({id:'main'},S.rec.cfg.main||{},patch); put('cfg',c);
+}
+
+/* ===== 주행거리 ===== */
+function points(){
+  const m={};
+  const add=(date,km,approx)=>{ if(!date||!(km>0))return; if(!m[date]||km>m[date].km) m[date]={date,km:Number(km),approx}; };
+  list('odo').forEach(r=>add(r.date,r.km,r.approx));
+  list('fuel').forEach(r=>add(r.date,r.odo));
+  list('maint').forEach(r=>add(r.date,r.km));
+  return Object.values(m).sort((a,b)=>a.date<b.date?-1:1);
+}
+function curOdo(){
+  // 가장 최근 날짜의 값 (같은 날 여러 값이면 직접 입력한 주행기록 우선)
+  const odos=list('odo').filter(r=>r.km>0).sort((a,b)=>a.date<b.date?-1:(a.date>b.date?1:a.updatedAt-b.updatedAt));
+  const pts=points(); const last=pts[pts.length-1];
+  if(!last) return null;
+  const o=odos.length?odos[odos.length-1]:null;
+  if(o && o.date>=last.date) return {km:Number(o.km),date:o.date,approx:!!o.approx};
+  return {km:last.km,date:last.date,approx:false};
+}
+function avgDaily(){
+  let pts=points(); if(pts.length<2) return null;
+  const from=fromDnum(dnum(today())-365);
+  let win=pts.filter(p=>p.date>=from);
+  const before=pts.filter(p=>p.date<from).pop();
+  if(before) win=[before,...win];
+  if(win.length<2) win=pts;
+  const a=win[0],b=win[win.length-1]; const d=daysBetween(a.date,b.date);
+  if(d<=0||b.km<=a.km) return null;
+  return (b.km-a.km)/d;
+}
+function monthlyKm(){
+  const pts=points(), res={};
+  for(let i=1;i<pts.length;i++){
+    const a=pts[i-1], b=pts[i]; const d=daysBetween(a.date,b.date); const diff=b.km-a.km;
+    if(d<=0||diff<0) continue;
+    const per=diff/d;
+    for(let k=1;k<=d;k++){const ym=fromDnum(dnum(a.date)+k).slice(0,7); res[ym]=(res[ym]||0)+per;}
+  }
+  return res;
+}
+function setCurKm(km,approx){
+  const t=today();
+  let r=list('odo').find(x=>x.date===t);
+  r=Object.assign(r||{},{date:t,km:Number(km),approx:approx?1:'',memo:(r&&r.memo)||'계기판'});
+  put('odo',r);
+}
+
+/* ===== 정비 상태 ===== */
+function lastFor(item){
+  let re; try{re=new RegExp(item.kw)}catch(e){re=null}
+  if(!re) return null;
+  const rs=list('maint').filter(r=>re.test(normWork(r.work))).sort((a,b)=>a.date<b.date?-1:(a.km-b.km));
+  return rs[rs.length-1]||null;
+}
+function status(item,cur,avg){
+  const c=cfg(); let last=lastFor(item), assumed=false;
+  if(!last){ assumed=true; last={date:c.built||null,km:0}; }
+  const out={item,last,assumed,state:'ok'};
+  if(!cur) return Object.assign(out,{state:'none'});
+  if(item.km>0){ out.dueKm=last.km+Number(item.km); out.remKm=out.dueKm-cur.km; }
+  if(item.mo>0 && last.date){ out.dueDate=addMonths(last.date,Number(item.mo)); out.remDays=daysBetween(today(),out.dueDate); }
+  if(out.remKm!=null && avg) out.estDate=fromDnum(dnum(today())+Math.max(0,Math.round(out.remKm/avg)));
+  const over=(out.remKm!=null&&out.remKm<=0)||(out.remDays!=null&&out.remDays<=0);
+  const soon=(out.remKm!=null&&out.remKm<=WARN_KM)||(out.remDays!=null&&out.remDays<=WARN_DAYS);
+  out.state=over?'over':soon?'soon':(assumed&&!c.built?'none':'ok');
+  return out;
+}
+const STATE_LABEL={ok:'정상',soon:'임박',over:'초과',none:'확인필요'};
+const STATE_RANK={over:0,soon:1,none:2,ok:3};
+
+/* ===== 주유 연비 ===== */
+function fuelCalc(){
+  const fs=list('fuel').filter(r=>r.odo>0).sort((a,b)=>a.odo-b.odo);
+  const eff={}; let totKm=0,totL=0,prevFull=null,acc=0;
+  fs.forEach(r=>{
+    acc+=Number(r.liters)||0;
+    if(r.full){
+      if(prevFull){ const km=r.odo-prevFull.odo; if(km>0&&acc>0){eff[r.id]=km/acc; totKm+=km; totL+=acc;} }
+      prevFull=r; acc=0;
+    }
+  });
+  return {eff,avg:totL>0?totKm/totL:null};
+}
+
+/* ===== 동기화 ===== */
+let syncing=false, syncTimer=null, syncMsg='';
+function schedSync(){clearTimeout(syncTimer);syncTimer=setTimeout(doSync,1200); setSyncLabel()}
+function dirtyCount(){let c=0;TYPES.forEach(t=>Object.values(S.rec[t]).forEach(r=>{if(r._dirty)c++}));return c}
+function setSyncLabel(){
+  const el=$('#sync'); if(!el)return;
+  if(!S.conn.url) el.textContent='○ 이 폰에만 저장';
+  else if(syncing) el.textContent='⟳ 동기화 중';
+  else if(!navigator.onLine) el.textContent='○ 오프라인 ('+dirtyCount()+'건 대기)';
+  else if(syncMsg) el.textContent='! '+syncMsg;
+  else if(dirtyCount()) el.textContent='● 대기 '+dirtyCount()+'건';
+  else el.textContent='● 동기화됨';
+}
+async function doSync(manual){
+  if(!S.conn.url||!S.conn.key||syncing) return;
+  if(!navigator.onLine){setSyncLabel();return}
+  syncing=true; syncMsg=''; setSyncLabel();
+  try{
+    const records={}; const sent=[];
+    TYPES.forEach(t=>{records[t]=Object.values(S.rec[t]).filter(r=>r._dirty).map(r=>{sent.push([t,r.id,r.updatedAt]);const o={};for(const k in r){if(k[0]!=='_')o[k]=r[k]}return o});});
+    const resp=await fetch(S.conn.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({key:S.conn.key,since:S.since,records})});
+    const j=await resp.json();
+    if(!j.ok) throw new Error(j.error==='auth'?'접속 코드가 맞지 않아요':j.error);
+    sent.forEach(([t,id,ts])=>{const r=S.rec[t][id]; if(r&&r.updatedAt===ts) delete r._dirty;});
+    TYPES.forEach(t=>(j.records[t]||[]).forEach(rm=>{
+      const loc=S.rec[t][rm.id];
+      if(loc&&loc._dirty&&loc.updatedAt>rm.updatedAt) return;
+      S.rec[t][rm.id]=rm;
+    }));
+    S.since=j.now; save();
+    if(manual) toast('동기화 완료');
+  }catch(e){ syncMsg=(e.message||'동기화 실패').slice(0,24); if(manual) toast('동기화 실패: '+e.message); }
+  syncing=false; setSyncLabel(); render();
+}
+
+/* ===== 모달 폼 ===== */
+function openForm({title,fields,values={},onSave,onDelete,hook}){
+  const m=$('#modal');
+  const fh=f=>{
+    const v=values[f.k]??f.def??'';
+    if(f.type==='checkbox') return `<label class="chk"><input type="checkbox" name="${f.k}" ${v?'checked':''}>${esc(f.label)}</label>`;
+    let inp;
+    if(f.type==='select') inp=`<select name="${f.k}">${f.opts.map(o=>`<option ${o==v?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+    else if(f.type==='textarea') inp=`<textarea name="${f.k}" rows="3" placeholder="${esc(f.ph||'')}">${esc(v)}</textarea>`;
+    else inp=`<input name="${f.k}" type="${f.type||'text'}" ${f.type==='number'?'inputmode="decimal" step="any"':''} value="${esc(v)}" placeholder="${esc(f.ph||'')}" ${f.list?`list="dl_${f.k}"`:''}>${f.list?`<datalist id="dl_${f.k}">${f.list.map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`:''}`;
+    return `<label>${esc(f.label)}</label>${inp}`;
+  };
+  m.innerHTML=`<div class="sheet"><h3>${esc(title)}</h3><form id="f">${fields.map(fh).join('')}<div class="btns">${onDelete?'<button type="button" class="dan" id="fd">삭제</button>':''}<button type="button" class="sec" id="fc">취소</button><button class="pri">저장</button></div></form></div>`;
+  m.classList.add('show');
+  const form=$('#f',m);
+  const close=()=>{m.classList.remove('show');m.innerHTML=''};
+  m.onclick=e=>{if(e.target===m)close()};
+  $('#fc',m).onclick=close;
+  if(onDelete)$('#fd',m).onclick=()=>{if(confirm('삭제할까요?')){onDelete();close();render()}};
+  if(hook)form.addEventListener('input',e=>hook(form,e));
+  form.onsubmit=e=>{
+    e.preventDefault(); const o={};
+    fields.forEach(f=>{
+      const el=form.elements[f.k];
+      if(f.type==='checkbox')o[f.k]=el.checked?1:'';
+      else if(f.type==='number')o[f.k]=el.value===''?'':Number(el.value);
+      else o[f.k]=el.value.trim();
+    });
+    if(onSave(o)===false)return;
+    close(); render();
+  };
+}
+
+/* ===== 화면 ===== */
+let tab='home', statYear=new Date().getFullYear();
+const TABS=[['home','🏠','홈'],['maint','🔧','정비'],['fuel','⛽','주유'],['odo','🛣️','주행'],['ins','🛡️','보험']];
+function renderNav(){
+  $('#nav').innerHTML=TABS.map(([k,i,l])=>`<button data-t="${k}" class="${tab===k?'on':''}"><b>${i}</b>${l}</button>`).join('');
+  $('#nav').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t;render();scrollTo(0,0)}};
+}
+function render(){
+  renderNav(); setSyncLabel();
+  const fab=$('#fab'); fab.style.display=tab==='home'?'none':'block';
+  fab.onclick=()=>({maint:formMaint,fuel:formFuel,odo:formOdo,ins:formIns}[tab])();
+  $('#main').innerHTML=({home:vHome,maint:vMaint,fuel:vFuel,odo:vOdo,ins:vIns}[tab])();
+  bind();
+}
+function bind(){
+  $('#main').querySelectorAll('[data-act]').forEach(el=>el.onclick=()=>{
+    const a=el.dataset.act,id=el.dataset.id;
+    if(a==='km')formKm();
+    else if(a==='em')formMaint(S.rec.maint[id]);
+    else if(a==='ef')formFuel(S.rec.fuel[id]);
+    else if(a==='eo')formOdo(S.rec.odo[id]);
+    else if(a==='ei')formIns(S.rec.ins[id]);
+    else if(a==='yr'){statYear+=Number(el.dataset.d);render()}
+    else if(a==='add')({maint:formMaint,fuel:formFuel,odo:formOdo,ins:formIns}[tab])();
+    else if(a==='addwork')formMaint({work:el.dataset.w});
+  });
+}
+
+function vHome(){
+  const cur=curOdo(), avg=avgDaily(), c=cfg();
+  let h='';
+  // 현재 주행거리
+  if(cur){
+    const ageDays=daysBetween(cur.date,today());
+    const est=(ageDays>3&&avg)?Math.round(cur.km+avg*ageDays):null;
+    h+=`<div class="card"><div class="row"><div class="sp"><div class="sub">현재 주행거리 ${cur.approx?'<span class="badge b-soon">대략</span>':''}</div><div class="big">${n0(cur.km)} <span style="font-size:16px">km</span></div></div><button class="sec" data-act="km">수정</button></div><div class="sub">${cur.date} 기준${est?` · 오늘 추정 약 ${n0(est)}km`:''}${avg?` · 하루 평균 ${Math.round(avg)}km`:''}</div></div>`;
+  } else {
+    h+=`<div class="card"><div class="empty">현재 주행거리를 입력해 주세요<br><br><button class="pri" data-act="km">주행거리 입력</button></div></div>`;
+  }
+  // 알림
+  const sts=c.items.map(it=>status(it,cur,avg)).sort((a,b)=>STATE_RANK[a.state]-STATE_RANK[b.state]);
+  const alerts=sts.filter(s=>s.state==='over'||s.state==='soon');
+  const insA=insAlert();
+  if(alerts.length||insA){
+    h+=`<div class="card"><h2>알림</h2>`;
+    alerts.forEach(s=>h+=`<div class="alert ${s.state==='over'?'red':''}"><b>${esc(s.item.name)}</b> ${s.state==='over'?'교체 시기가 지났어요':'곧 교체 시기예요'} · ${remText(s)}</div>`);
+    if(insA)h+=`<div class="alert ${insA.red?'red':''}">${insA.text}</div>`;
+    h+=`</div>`;
+  }
+  // 정비 상태
+  h+=`<div class="card"><h2>정비 상태</h2>`;
+  sts.forEach(s=>{
+    const it=s.item;
+    h+=`<div class="item"><div class="t"><span class="sp">${esc(it.name)}</span><span class="badge b-${s.state}">${STATE_LABEL[s.state]}</span></div>
+    <div class="sub">${s.assumed?(c.built?`기록 없음 · 출고(${c.built}) 이후 교체 안 한 것으로 계산`:'정비 기록이 없어요'):`마지막 ${n0(s.last.km)}km · ${s.last.date}`}</div>
+    <div class="sub">다음 ${s.dueKm!=null?n0(s.dueKm)+'km':''}${s.dueKm!=null&&s.dueDate?' / ':''}${s.dueDate||''} · ${remText(s)}</div></div>`;
+  });
+  h+=`<div class="note">기준: 설정 ⚙︎ 에서 항목별 주기를 쉐보레 매뉴얼에 맞게 수정할 수 있어요. 참고용이며 최종 판단은 정비소 점검 기준을 따르세요.</div></div>`;
+  h+=vStats();
+  return h;
+}
+function remText(s){
+  const p=[];
+  const o=s.state==='over';
+  if(s.remKm!=null&&(!o||s.remKm<0))p.push(s.remKm>=0?`${n0(s.remKm)}km 남음`:`${n0(-s.remKm)}km 초과`);
+  if(s.remDays!=null&&(!o||s.remDays<0))p.push(s.remDays>=0?`${n0(s.remDays)}일 남음`:`${n0(-s.remDays)}일 초과`);
+  if(s.estDate&&s.remKm>0)p.push(`약 ${s.estDate} 도달 예상`);
+  return p.join(' · ')||'-';
+}
+function insAlert(){
+  const rs=list('ins').filter(r=>r.end).sort((a,b)=>a.end<b.end?-1:1); const r=rs[rs.length-1]; if(!r)return null;
+  const d=daysBetween(today(),r.end);
+  if(d<0)return {red:1,text:`<b>${esc(r.company||'보험')}</b> 만기일(${r.end})이 지났어요. 갱신 여부를 확인하세요.`};
+  if(d<=45)return {red:d<=14,text:`<b>${esc(r.company||'보험')}</b> 만기까지 ${d}일 남았어요 (${r.end}).`};
+  return null;
+}
+function vStats(){
+  const months=Array.from({length:12},(_,i)=>({f:0,m:0,i:0}));
+  const add=(date,key,v)=>{ if(!date||!v||date.slice(0,4)!=String(statYear))return; months[Number(date.slice(5,7))-1][key]+=Number(v)||0; };
+  list('fuel').forEach(r=>add(r.date,'f',r.amount));
+  list('maint').forEach(r=>add(r.date,'m',r.cost));
+  list('ins').forEach(r=>add(r.start,'i',r.premium));
+  const tot=months.reduce((a,x)=>({f:a.f+x.f,m:a.m+x.m,i:a.i+x.i}),{f:0,m:0,i:0});
+  const max=Math.max(1,...months.map(x=>x.f+x.m+x.i));
+  const km=monthlyKm(); let yk=0; Object.keys(km).forEach(k=>{if(k.slice(0,4)==String(statYear))yk+=km[k]});
+  const fc=fuelCalc();
+  let h=`<div class="card"><h2><span>유지비 통계</span><span class="row"><button class="sec sm" data-act="yr" data-d="-1">‹</button><b>${statYear}</b><button class="sec sm" data-act="yr" data-d="1">›</button></span></h2>
+  <div class="kv"><span>유류비</span><b>${won(tot.f)}</b></div><div class="kv"><span>정비비</span><b>${won(tot.m)}</b></div><div class="kv"><span>보험료</span><b>${won(tot.i)}</b></div>
+  <div class="kv" style="border-top:1px solid var(--line);margin-top:4px;padding-top:8px"><span>합계</span><b>${won(tot.f+tot.m+tot.i)}</b></div>
+  <div class="kv"><span>연간 주행거리(추정)</span><b>${n0(Math.round(yk))}km</b></div>
+  ${fc.avg?`<div class="kv"><span>평균 연비</span><b>${fc.avg.toFixed(1)}km/L</b></div>`:''}
+  <div class="bars">${months.map((x,i)=>{const t=x.f+x.m+x.i;return `<div class="bar" title="${won(t)}"><i class="c-ins" style="height:${x.i/max*100}%"></i><i class="c-maint" style="height:${x.m/max*100}%"></i><i class="c-fuel" style="height:${x.f/max*100}%"></i><span>${i+1}</span></div>`}).join('')}</div>
+  <div class="lg"><span><u class="c-fuel"></u>유류</span><span><u class="c-maint"></u>정비</span><span><u class="c-ins"></u>보험(가입월)</span></div></div>`;
+  return h;
+}
+
+/* ---- 정비 ---- */
+function vMaint(){
+  const rs=list('maint').sort((a,b)=>a.date<b.date?1:(a.date>b.date?-1:b.km-a.km));
+  if(!rs.length)return `<div class="card empty">정비 기록이 없어요.<br>⚙︎ 설정에서 엑셀을 가져오거나 + 추가로 입력하세요.</div>`;
+  let h='',cur='';
+  const groups={};rs.forEach(r=>{const k=r.date+'|'+(r.km||'')+'|'+(r.center||'');(groups[k]=groups[k]||[]).push(r)});
+  h+=`<div class="card list">`;
+  Object.keys(groups).forEach(k=>{
+    const g=groups[k], f=g[0]; const sum=g.reduce((a,r)=>a+(Number(r.cost)||0),0);
+    h+=`<div class="it"><div class="m"><b>${f.date}</b> <span class="sub">${esc(f.center||'')}</span><div class="sub">${f.km?n0(f.km)+'km':''}</div>${g.map(r=>`<div data-act="em" data-id="${r.id}" style="padding:3px 0">• ${esc(r.work)}${r.cost?` <span class="sub">${won(r.cost)}</span>`:''}${r.note?` <span class="sub">(${esc(r.note)})</span>`:''}</div>`).join('')}</div><div class="r">${sum?won(sum):''}</div></div>`;
+  });
+  return h+'</div>';
+}
+function formMaint(r){
+  r=r||{}; const cur=curOdo();
+  const sugg=cfg().items.map(i=>i.name);
+  openForm({title:r.id?'정비 수정':'정비 추가',values:{date:today(),km:cur?cur.km:'',...r},
+    fields:[{k:'date',label:'날짜',type:'date'},{k:'center',label:'정비소',list:[...new Set(list('maint').map(x=>x.center).filter(Boolean))]},{k:'work',label:'작업내용 (예: 엔진오일 교환)',list:['엔진오일 교환','에어컨에어필터 탈부착','타이어 위치교환','브레이크오일 교환','점화플러그 교환','오토미션오일 교환','부동액 교환','와이퍼 교체','배터리 교체']},{k:'km',label:'주행거리(km)',type:'number'},{k:'cost',label:'비용(원)',type:'number'},{k:'note',label:'메모'}],
+    onSave:o=>{if(!o.date||!o.work){toast('날짜와 작업내용은 필수예요');return false} put('maint',Object.assign(r.id?S.rec.maint[r.id]:{},o))},
+    onDelete:r.id?()=>del('maint',r.id):null});
+}
+
+/* ---- 주유 ---- */
+function vFuel(){
+  const rs=list('fuel').sort((a,b)=>a.date<b.date?1:-1); const fc=fuelCalc();
+  if(!rs.length)return `<div class="card empty">주유 기록이 없어요.<br>+ 추가로 입력하세요.</div>`;
+  const ym=today().slice(0,7); const mt=rs.filter(r=>r.date.slice(0,7)===ym).reduce((a,r)=>a+(Number(r.amount)||0),0);
+  let h=`<div class="card"><div class="kv"><span>이번 달 주유비</span><b>${won(mt)}</b></div>${fc.avg?`<div class="kv"><span>평균 연비</span><b>${fc.avg.toFixed(1)} km/L</b></div>`:''}</div><div class="card list">`;
+  rs.forEach(r=>h+=`<div class="it" data-act="ef" data-id="${r.id}"><div class="m"><b>${r.date}</b> <span class="sub">${esc(r.station||'')}</span><div class="sub">${r.liters?r.liters+'L':''}${r.price?' × '+n0(r.price)+'원':''}${r.odo?' · '+n0(r.odo)+'km':''}${fc.eff[r.id]?' · <b style="color:var(--ok)">'+fc.eff[r.id].toFixed(1)+'km/L</b>':''}</div></div><div class="r"><b>${won(r.amount)}</b></div></div>`);
+  return h+'</div>';
+}
+function formFuel(r){
+  r=r||{}; const cur=curOdo(); const last=list('fuel').sort((a,b)=>a.date<b.date?1:-1)[0];
+  let manualAmt=!!r.id;
+  openForm({title:r.id?'주유 수정':'주유 추가',values:{date:today(),odo:cur?cur.km:'',station:last?last.station:'S-OIL',full:1,...r},
+    fields:[{k:'date',label:'날짜',type:'date'},{k:'station',label:'주유소'},{k:'liters',label:'주유량(L)',type:'number'},{k:'price',label:'리터당 단가(원)',type:'number'},{k:'amount',label:'결제 금액(원)',type:'number'},{k:'odo',label:'주행거리(km)',type:'number'},{k:'full',label:'가득 주유 (연비 계산에 사용)',type:'checkbox'},{k:'note',label:'메모'}],
+    hook:(f,e)=>{
+      const g=k=>Number(f.elements[k].value)||0;
+      if(e.target.name==='amount')manualAmt=true;
+      if((e.target.name==='liters'||e.target.name==='price')&&g('liters')&&g('price')&&!manualAmt)f.elements.amount.value=Math.round(g('liters')*g('price'));
+      if(e.target.name==='amount'&&g('liters')&&!g('price'))f.elements.price.value=Math.round(g('amount')/g('liters'));
+    },
+    onSave:o=>{if(!o.date||!o.amount){toast('날짜와 금액은 필수예요');return false} put('fuel',Object.assign(r.id?S.rec.fuel[r.id]:{},o)); if(o.odo>0&&(!cur||o.date>=cur.date)&&false){}},
+    onDelete:r.id?()=>del('fuel',r.id):null});
+}
+
+/* ---- 주행 ---- */
+function vOdo(){
+  const pts=points(); const mk=monthlyKm();
+  const rs=list('odo').sort((a,b)=>a.date<b.date?1:-1);
+  let h='';
+  const ms=Object.keys(mk).sort().reverse().slice(0,12);
+  if(ms.length)h+=`<div class="card"><h2>월별 주행거리 (추정)</h2>${ms.map(m=>`<div class="kv"><span>${m}</span><b>${n0(Math.round(mk[m]))}km</b></div>`).join('')}<div class="note">기록 사이 구간은 일정하게 달린 것으로 나눠 계산해요.</div></div>`;
+  h+=`<div class="card list"><h2>주행거리 기록</h2>`;
+  if(!rs.length)h+=`<div class="empty">+ 추가로 계기판 km를 입력하세요</div>`;
+  rs.forEach((r,i)=>{const prev=rs[i+1];h+=`<div class="it" data-act="eo" data-id="${r.id}"><div class="m"><b>${r.date}</b> <span class="sub">${esc(r.memo||'')}</span></div><div class="r"><b>${n0(r.km)}km</b>${r.approx?' <span class="badge b-soon">대략</span>':''}${prev?`<div class="sub">+${n0(r.km-prev.km)}km</div>`:''}</div></div>`});
+  h+=`<div class="note">정비·주유 기록의 km도 주행 계산에 함께 사용돼요.</div></div>`;
+  return h;
+}
+function formKm(){
+  const cur=curOdo();
+  openForm({title:'현재 주행거리 수정',values:{km:cur?cur.km:'',approx:cur?(cur.approx?1:''):1},
+    fields:[{k:'km',label:'계기판 km',type:'number'},{k:'approx',label:'정확하지 않은 대략값',type:'checkbox'}],
+    onSave:o=>{if(!(o.km>0)){toast('km를 입력하세요');return false} setCurKm(o.km,o.approx)}});
+}
+function formOdo(r){
+  r=r||{};
+  openForm({title:r.id?'주행기록 수정':'주행기록 추가',values:{date:today(),...r},
+    fields:[{k:'date',label:'날짜',type:'date'},{k:'km',label:'계기판 km',type:'number'},{k:'approx',label:'대략값',type:'checkbox'},{k:'memo',label:'메모 (예: 장거리 여행)'}],
+    onSave:o=>{if(!o.date||!(o.km>0)){toast('날짜와 km는 필수예요');return false} put('odo',Object.assign(r.id?S.rec.odo[r.id]:{},o))},
+    onDelete:r.id?()=>del('odo',r.id):null});
+}
+
+/* ---- 보험 ---- */
+function vIns(){
+  const rs=list('ins').sort((a,b)=>a.start<b.start?1:-1);
+  if(!rs.length)return `<div class="card empty">보험 정보가 없어요.<br>+ 추가로 KB손해보험 증권 정보를 입력하세요.</div>`;
+  return rs.map((r,i)=>{const d=r.end?daysBetween(today(),r.end):null;
+    return `<div class="card" data-act="ei" data-id="${r.id}"><h2><span>${esc(r.company||'보험')} ${i===0?'<span class="badge b-ok">최근</span>':''}</span>${d!=null?`<span class="badge ${d<0?'b-over':d<=45?'b-soon':'b-ok'}">${d<0?'만기 지남':'D-'+d}</span>`:''}</h2>
+    <div class="kv"><span>보험기간</span><b>${r.start||''} ~ ${r.end||''}</b></div>
+    <div class="kv"><span>보험료</span><b>${r.premium?won(r.premium):'-'}</b></div>
+    ${r.policy?`<div class="kv"><span>증권번호</span><b>${esc(r.policy)}</b></div>`:''}
+    ${r.cover?`<div class="sub" style="margin-top:6px;white-space:pre-line">${esc(r.cover)}</div>`:''}
+    ${r.special?`<div class="sub" style="margin-top:6px">특약: ${esc(r.special)}</div>`:''}
+    ${mileBox(r)}
+    ${r.note?`<div class="sub">${esc(r.note)}</div>`:''}</div>`}).join('');
+}
+function mileBox(r){
+  if(!(r.mileBase>0))return '';
+  const cur=curOdo(); if(!cur)return '';
+  const used=cur.km-r.mileBase, lim=Number(r.mileLimit)||15000, left=lim-used;
+  const over=left<0;
+  return `<div class="alert ${over?'red':''}" style="margin-top:8px"><b>마일리지 특약</b> 시작 ${n0(r.mileBase)}km → 현재 ${n0(cur.km)}km (${n0(used)}km 주행)<br>${over?`할인 한도 ${n0(lim)}km를 ${n0(-left)}km 넘었어요`:`할인 한도 ${n0(lim)}km까지 ${n0(left)}km 남음`}${r.end&&used>0?(()=>{const d=daysBetween(r.start,today());const tot=daysBetween(r.start,r.end);return d>30?`<br>이 속도면 만기까지 약 ${n0(Math.round(used/d*tot))}km 주행 예상`:''})():''}</div>`;
+}
+function formIns(r){
+  r=r||{}; const l=list('ins').sort((a,b)=>a.start<b.start?1:-1)[0];
+  openForm({title:r.id?'보험 수정':'보험 추가',values:{company:'KB손해보험',start:today(),end:addMonths(today(),12),...(r.id?r:{})},
+    fields:[{k:'company',label:'보험사'},{k:'policy',label:'증권번호'},{k:'start',label:'보험 시작일',type:'date'},{k:'end',label:'보험 만기일',type:'date'},{k:'premium',label:'보험료(원)',type:'number'},{k:'cover',label:'가입 담보 (줄바꿈으로 구분)',type:'textarea'},{k:'special',label:'적용 특약',type:'textarea'},{k:'mileBase',label:'마일리지 특약 시작 km (없으면 비움)',type:'number'},{k:'mileLimit',label:'마일리지 할인 주행 한도 km',type:'number'},{k:'note',label:'메모 (담당자, 연락처 등)',type:'textarea'}],
+    onSave:o=>{if(!o.start||!o.end){toast('시작일과 만기일은 필수예요');return false} put('ins',Object.assign(r.id?S.rec.ins[r.id]:{},o))},
+    onDelete:r.id?()=>del('ins',r.id):null});
+}
+
+/* ===== 설정 ===== */
+function formSettings(){
+  const c=cfg(); const m=$('#modal');
+  const itemsTxt=c.items.map(i=>[i.name,i.kw,i.km,i.mo].join(' | ')).join('\n');
+  m.innerHTML=`<div class="sheet"><h3>설정</h3>
+  <label>차량 이름</label><input id="s_car" value="${esc(c.carName)}" placeholder="더 뉴 트랙스 1.4D">
+  <label>차량 출고일 (교체 기록이 없는 항목 계산에 사용)</label><input id="s_built" type="date" value="${esc(c.built)}">
+  <label>정비 항목 (한 줄에 하나)<br>이름 | 기록 찾는 단어(정규식) | 교체주기 km | 교체주기 개월(0=없음)</label><textarea id="s_items" rows="8" style="font-size:13px">${esc(itemsTxt)}</textarea>
+  <div class="row" style="margin-top:8px"><button class="sec sm" id="s_rst">기본값으로</button><span class="sub">기본값은 쉐보레 사이트 예상치 기준이에요. 매뉴얼에 맞게 고쳐 쓰세요.</span></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+  <b>공유 연결 (Google 시트)</b>
+  <label>웹앱 주소</label><input id="s_url" value="${esc(S.conn.url)}" placeholder="https://script.google.com/macros/s/.../exec">
+  <label>접속 코드</label><input id="s_key" value="${esc(S.conn.key)}">
+  <div class="row" style="margin-top:8px"><button class="sec" id="s_link">배우자에게 보낼 설정 링크 복사</button></div>
+  <hr style="border:0;border-top:1px solid var(--line);margin:16px 0">
+  <b>데이터</b>
+  <div class="row" style="margin-top:8px;flex-wrap:wrap"><button class="sec" id="s_xl">정비 엑셀 가져오기</button><button class="sec" id="s_bk">백업(JSON) 내려받기</button></div>
+  <input type="file" id="s_file" accept=".xlsx,.xls,.csv" style="display:none">
+  <div class="btns"><button class="sec" id="s_close">닫기</button><button class="pri" id="s_save">저장</button></div></div>`;
+  m.classList.add('show');
+  const close=()=>{m.classList.remove('show');m.innerHTML=''};
+  m.onclick=e=>{if(e.target===m)close()};
+  $('#s_close').onclick=close;
+  $('#s_rst').onclick=()=>{$('#s_items').value=DEF_ITEMS.map(i=>[i.name,i.kw,i.km,i.mo].join(' | ')).join('\n')};
+  $('#s_save').onclick=()=>{
+    const items=$('#s_items').value.split('\n').map(l=>l.split('|').map(x=>x.trim())).filter(a=>a[0]&&a[1]).map(a=>({name:a[0],kw:a[1],km:Number(a[2])||0,mo:Number(a[3])||0}));
+    saveCfg({carName:$('#s_car').value.trim(),built:$('#s_built').value,items:JSON.stringify(items)});
+    S.conn.url=$('#s_url').value.trim(); S.conn.key=$('#s_key').value.trim(); save();
+    close(); render(); doSync(true);
+  };
+  $('#s_link').onclick=async()=>{
+    const u=$('#s_url').value.trim(),k=$('#s_key').value.trim(); if(!u||!k){toast('주소와 코드를 먼저 입력하세요');return}
+    const link=location.origin+location.pathname+'#setup='+btoa(unescape(encodeURIComponent(JSON.stringify({u,k}))));
+    try{await navigator.clipboard.writeText(link);toast('링크를 복사했어요')}catch(e){prompt('이 링크를 복사하세요',link)}
+  };
+  $('#s_bk').onclick=()=>{const b=new Blob([JSON.stringify(S.rec,null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='car-backup-'+today()+'.json';a.click()};
+  $('#s_xl').onclick=()=>$('#s_file').click();
+  $('#s_file').onchange=async e=>{const f=e.target.files[0];if(f){await importExcel(f);close();render()}};
+}
+
+/* ===== 엑셀 가져오기 ===== */
+function loadXLSX(){
+  return new Promise((res,rej)=>{
+    if(window.XLSX)return res();
+    const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload=res; s.onerror=()=>rej(new Error('엑셀 라이브러리를 불러오지 못했어요 (인터넷 필요)')); document.head.appendChild(s);
+  });
+}
+function xlDate(v){
+  if(v==null||v==='')return '';
+  if(typeof v==='number'){return fromDnum(Math.round(v)-25569)}
+  const s=String(v).trim().replace(/[./]/g,'-'); const m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  return m?`${m[1]}-${pad(m[2])}-${pad(m[3])}`:'';
+}
+async function importExcel(file){
+  try{
+    await loadXLSX();
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});
+    const ws=wb.Sheets['정비이력']||wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:''});
+    const hi=rows.findIndex(r=>r.some(c=>String(c).includes('작업내')));
+    if(hi<0)throw new Error('"작업내역" 열을 찾지 못했어요');
+    const H=rows[hi].map(x=>String(x).trim()); const ix=n=>H.findIndex(h=>h.includes(n));
+    const iD=ix('작업일자')>=0?ix('작업일자'):ix('접수일자'), iR=ix('예약일자')>=0?ix('예약일자'):ix('접수일자'), iC=ix('정비센터')>=0?ix('정비센터'):ix('서비스센터'), iW=ix('작업내'), iK=ix('주행'), iP=ix('비용'), iN=ix('비고');
+    const list0=[];
+    rows.slice(hi+1).forEach(r=>{
+      const date=xlDate(r[iD])||xlDate(r[iR]); const work=normWork(r[iW]);
+      if(!date||!work||/^고객상담/.test(work))return;
+      list0.push({date,center:normWork(r[iC]),work,km:Number(String(r[iK]).replace(/,/g,''))||'',cost:Number(String(r[iP]).replace(/,/g,''))||'',note:normWork(r[iN])});
+    });
+    const added=importMaint(list0);
+    toast(`${added}건 추가 (중복 ${list0.length-added}건 건너뜀)`);
+  }catch(e){alert('가져오기 실패: '+e.message)}
+}
+function importMaint(arr){
+  const key=r=>[r.date,r.km||'',normWork(r.work).replace(/ /g,'')].join('|');
+  const have=new Set(list('maint').map(key)); let n=0;
+  arr.forEach(r=>{ if(have.has(key(r)))return; have.add(key(r)); put('maint',{...r}); n++; });
+  return n;
+}
+window.carApp={importMaint,put,list,S:()=>S,setCurKm,saveCfg,doSync,curOdo,avgDaily,status,cfg,render};
+
+/* ===== 시작 ===== */
+$('#btnSet').onclick=formSettings;
+$('#btnSync').onclick=()=>S.conn.url?doSync(true):formSettings();
+addEventListener('online',()=>doSync());
+addEventListener('offline',setSyncLabel);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)doSync()});
+setInterval(()=>{if(!document.hidden)doSync()},90000);
+(function init(){
+  const m=location.hash.match(/#setup=(.+)$/);
+  if(m){ try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1]))));S.conn.url=o.u;S.conn.key=o.k;save();history.replaceState(null,'',location.pathname);setTimeout(()=>toast('공유 설정이 완료됐어요'),400)}catch(e){} }
+  render(); doSync();
+  if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
