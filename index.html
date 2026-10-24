@@ -223,6 +223,12 @@ function setSyncLabel(){
   else if(dirtyCount()) el.textContent='● 대기 '+dirtyCount()+'건';
   else el.textContent='● 동기화됨';
 }
+function fixDates(r){
+  for(const k in r){
+    const v=r[k];
+    if(typeof v==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(v)){ r[k]=isoOf(new Date(v)); }
+  }
+}
 async function doSync(manual){
   if(!S.conn.url||!S.conn.key||syncing) return;
   if(!navigator.onLine){setSyncLabel();return}
@@ -235,6 +241,7 @@ async function doSync(manual){
     if(!j.ok) throw new Error(j.error==='auth'?'접속 코드가 맞지 않아요':j.error);
     sent.forEach(([t,id,ts])=>{const r=S.rec[t][id]; if(r&&r.updatedAt===ts) delete r._dirty;});
     TYPES.forEach(t=>(j.records[t]||[]).forEach(rm=>{
+      fixDates(rm);
       const loc=S.rec[t][rm.id];
       if(loc&&loc._dirty&&loc.updatedAt>rm.updatedAt) return;
       S.rec[t][rm.id]=rm;
