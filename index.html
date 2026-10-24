@@ -64,6 +64,8 @@ input[type=checkbox]{width:auto;margin-right:6px}
 .empty{color:var(--sub);text-align:center;padding:24px 0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:#111c;color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;z-index:30}
 .note{font-size:12px;color:var(--sub);margin-top:6px}
+a.sec{display:inline-block;background:#f1ebfd;color:var(--pri);border-radius:10px;padding:9px 12px;font-size:14px;text-decoration:none}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -72,6 +74,7 @@ input[type=checkbox]{width:auto;margin-right:6px}
 <button class="fab" id="fab" style="display:none">+ 추가</button>
 <nav id="nav"></nav>
 <div id="modal"></div>
+<input type="file" id="rfile" accept="image/*" style="display:none">
 
 <script>
 'use strict';
@@ -310,6 +313,9 @@ function bind(){
     else if(a==='yr'){statYear+=Number(el.dataset.d);render()}
     else if(a==='add')({maint:formMaint,fuel:formFuel,odo:formOdo,ins:formIns}[tab])();
     else if(a==='addwork')formMaint({work:el.dataset.w});
+    else if(a==='rcpt')$('#rfile').click();
+    else if(a==='paste')formPaste();
+    else if(a==='trip')formTrip();
   });
 }
 
@@ -405,10 +411,10 @@ function formMaint(r){
 
 /* ---- 주유 ---- */
 function vFuel(){
-  const rs=list('fuel').sort((a,b)=>a.date<b.date?1:-1); const fc=fuelCalc();
-  if(!rs.length)return `<div class="card empty">주유 기록이 없어요.<br>+ 추가로 입력하세요.</div>`;
+  const rs=list('fuel').sort((a,b)=>a.date<b.date?1:-1); const fc=fuelCalc(); const tools=fuelTools();
+  if(!rs.length)return tools+`<div class="card empty">주유 기록이 없어요.<br>+ 추가로 입력하세요.</div>`;
   const ym=today().slice(0,7); const mt=rs.filter(r=>r.date.slice(0,7)===ym).reduce((a,r)=>a+(Number(r.amount)||0),0);
-  let h=`<div class="card"><div class="kv"><span>이번 달 주유비</span><b>${won(mt)}</b></div>${fc.avg?`<div class="kv"><span>평균 연비</span><b>${fc.avg.toFixed(1)} km/L</b></div>`:''}</div><div class="card list">`;
+  let h=tools+`<div class="card"><div class="kv"><span>이번 달 주유비</span><b>${won(mt)}</b></div>${fc.avg?`<div class="kv"><span>평균 연비</span><b>${fc.avg.toFixed(1)} km/L</b></div>`:''}</div><div class="card list">`;
   rs.forEach(r=>h+=`<div class="it" data-act="ef" data-id="${r.id}"><div class="m"><b>${r.date}</b> <span class="sub">${esc(r.station||'')}</span><div class="sub">${r.liters?r.liters+'L':''}${r.price?' × '+n0(r.price)+'원':''}${r.odo?' · '+n0(r.odo)+'km':''}${fc.eff[r.id]?' · <b style="color:var(--ok)">'+fc.eff[r.id].toFixed(1)+'km/L</b>':''}</div></div><div class="r"><b>${won(r.amount)}</b></div></div>`);
   return h+'</div>';
 }
@@ -431,7 +437,7 @@ function formFuel(r){
 function vOdo(){
   const pts=points(); const mk=monthlyKm();
   const rs=list('odo').sort((a,b)=>a.date<b.date?1:-1);
-  let h='';
+  let h=`<div class="card"><h2>T맵 연동</h2><div class="tools"><a class="sec" href="${TMAP_LINK}">T맵 열기</a><button class="pri" data-act="trip">T맵 주행거리 더하기</button></div><div class="note">T맵의 주행 기록은 앱 밖으로 내보내지 지 않아요. T맵에서 본 운행 거리(km)를 입력하면 현재 주행거리에 더해 저장해요.</div></div>`;
   const ms=Object.keys(mk).sort().reverse().slice(0,12);
   if(ms.length)h+=`<div class="card"><h2>월별 주행거리 (추정)</h2>${ms.map(m=>`<div class="kv"><span>${m}</span><b>${n0(Math.round(mk[m]))}km</b></div>`).join('')}<div class="note">기록 사이 구간은 일정하게 달린 것으로 나눠 계산해요.</div></div>`;
   h+=`<div class="card list"><h2>주행거리 기록</h2>`;
@@ -481,6 +487,80 @@ function formIns(r){
     fields:[{k:'company',label:'보험사'},{k:'policy',label:'증권번호'},{k:'start',label:'보험 시작일',type:'date'},{k:'end',label:'보험 만기일',type:'date'},{k:'premium',label:'보험료(원)',type:'number'},{k:'cover',label:'가입 담보 (줄바꿈으로 구분)',type:'textarea'},{k:'special',label:'적용 특약',type:'textarea'},{k:'mileBase',label:'마일리지 특약 시작 km (없으면 비움)',type:'number'},{k:'mileLimit',label:'마일리지 할인 주행 한도 km',type:'number'},{k:'note',label:'메모 (담당자, 연락처 등)',type:'textarea'}],
     onSave:o=>{if(!o.start||!o.end){toast('시작일과 만기일은 필수예요');return false} put('ins',Object.assign(r.id?S.rec.ins[r.id]:{},o))},
     onDelete:r.id?()=>del('ins',r.id):null});
+}
+
+/* ===== 외부 앱 연동 (안드로이드) ===== */
+const SOIL_LINK='intent://#Intent;package=com.soilbonus.goodoilfamily;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.soilbonus.goodoilfamily;end';
+const TMAP_LINK='intent://#Intent;package=com.skt.tmap.ku;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.skt.tmap.ku;end';
+function fuelTools(){
+  return `<div class="card"><h2>주유 내역 가져오기</h2><div class="tools"><button class="pri" data-act="rcpt">📷 영수증 캡처 읽기</button><button class="sec" data-act="paste">📋 글자 붙여넣기</button><a class="sec" href="${SOIL_LINK}">MY S-OIL 열기</a></div><div class="note">MY S-OIL 앱 > 전자영수증 화면을 캡처한 뒤 '영수증 캡처 읽기'로 고르면 날짜, 주유량, 단가, 금액을 자동으로 채워요. 캡처 화면에서 공유 > 3912를 누르면 바로 열려요. 저장 전에 숫자를 한 번 확인하세요.</div></div>`;
+}
+function showBusy(m){let b=$('#busy');if(!b){b=document.createElement('div');b.id='busy';b.className='toast';document.body.appendChild(b)}b.textContent=m}
+function hideBusy(){const b=$('#busy');if(b)b.remove()}
+function loadTess(){
+  return new Promise((res,rej)=>{
+    if(window.Tesseract)return res();
+    const s=document.createElement('script'); s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload=res; s.onerror=()=>rej(new Error('글자 인식 도구를 불러오지 못했어요 (인터넷 필요)')); document.head.appendChild(s);
+  });
+}
+async function ocrImage(blob){
+  showBusy('영수증 글자 인식 준비 중… (처음에는 1분 정도 걸려요)');
+  await loadTess();
+  const w=await Tesseract.createWorker('kor+eng',1,{logger:m=>{if(m.status==='recognizing text')showBusy('영수증 읽는 중… '+Math.round(m.progress*100)+'%')}});
+  try{ const {data}=await w.recognize(blob); return data.text; } finally { await w.terminate(); }
+}
+function parseReceipt(raw){
+  const t=String(raw||'').replace(/[ \t\u3000]+/g,'');
+  const num=s=>Number(String(s).replace(/,/g,'').replace(/[^\d.]/g,''));
+  const out={};
+  let m=t.match(/(20\d\d)[.\-\/년](\d{1,2})[.\-\/월](\d{1,2})/); if(m)out.date=`${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  m=t.match(/주유량[:：]?([\d.,]+)/); if(m){let s=m[1]; if(/,\d{1,2}$/.test(s)&&!/\./.test(s))s=s.replace(',','.'); const v=num(s); if(v>0&&v<400)out.liters=v;}
+  m=t.match(/단가[:：]?([\d,]{3,6})/); if(m){const v=num(m[1]); if(v>300&&v<5000)out.price=v;}
+  m=t.match(/주유금액[:：]?([\d,]{4,9})/)||t.match(/총[^\d]{0,6}금액([\d,]{4,9})/); if(m){const v=num(m[1]); if(v>=1000)out.amount=v;}
+  if(out.amount&&out.price&&!out.liters)out.liters=Math.round(out.amount/out.price*100)/100;
+  if(out.amount&&out.liters&&!out.price)out.price=Math.round(out.amount/out.liters);
+  if(out.liters&&out.price&&!out.amount)out.amount=Math.round(out.liters*out.price);
+  if(out.liters&&(String(out.liters).split('.')[1]||'').length>2)out.liters=Math.floor(out.liters*100)/100;
+  if(out.liters&&out.price&&out.amount){const ex=out.amount/out.price; if(Math.abs(out.liters-ex)>0.3)out.liters=Math.round(ex*100)/100;}
+  if(out.liters&&out.price&&out.amount&&Math.abs(out.liters*out.price-out.amount)>out.amount*0.02+100)out.warn=true;
+  // 주유소이름: '주소' 줄 바로 위의 한글 줄
+  const lines=String(raw||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const ai=lines.findIndex(l=>/^주\s*소/.test(l));
+  for(let i=ai-1;i>=0&&ai>0;i--){ if(/[가-힣]/.test(lines[i])&&!/S-?OIL|영수증/i.test(lines[i])&&lines[i].length<=30){out.station=lines[i].replace(/\s+/g,' ');break;} }
+  return out;
+}
+function fuelFromReceipt(p){
+  if(!p.amount&&!p.liters){alert('영수증에서 주유량이나 금액을 찾지 못했어요.\n화면 전체가 나오도록 다시 캡처하거나 직접 입력해 주세요.');return}
+  if(p.date&&p.amount&&list('fuel').some(r=>r.date===p.date&&Number(r.amount)===p.amount)){ if(!confirm('같은 날짜와 금액의 주유 기록이 이미 있어요. 그래도 추가할까요?'))return; }
+  const v={odo:'',note:'영수증에서 가져옴'+(p.warn?' (숫자 확인 필요)':'')};
+  ['date','station','liters','price','amount'].forEach(k=>{if(p[k]!=null&&p[k]!=='')v[k]=p[k]});
+  if(p.warn)toast('리터 \xd7 단가와 금액이 달라요. 숫자를 확인하세요');
+  tab='fuel'; render(); formFuel(v);
+}
+async function handleReceiptImage(blob){
+  try{ const text=await ocrImage(blob); hideBusy(); fuelFromReceipt(parseReceipt(text)); }
+  catch(e){ hideBusy(); alert('영수증을 읽지 못했어요: '+e.message); }
+}
+function formPaste(){
+  openForm({title:'영수증 글자 붙여넣기',values:{},fields:[{k:'txt',label:'영수증 내용을 붙여넣으세요',type:'textarea'}],
+    onSave:o=>{const p=parseReceipt(o.txt); setTimeout(()=>fuelFromReceipt(p),50);}});
+}
+function formTrip(){
+  const cur=curOdo(); if(!cur){toast('먼저 현재 주행거리를 입력하세요');return}
+  openForm({title:'T맵 주행거리 더하기',values:{date:today(),trip:''},fields:[{k:'date',label:'날짜',type:'date'},{k:'trip',label:'T맵에서 본 운행 거리(km)',type:'number'}],
+    onSave:o=>{ if(!(o.trip>0)){toast('거리를 입력하세요');return false}
+      const km=Math.round((cur.km+o.trip)*10)/10; put('odo',{date:o.date,km,approx:1,memo:'T맵 운행 +'+o.trip+'km'}); toast('현재 '+n0(km)+'km로 저장했어요'); }});
+}
+$('#rfile').onchange=e=>{const f=e.target.files[0]; e.target.value=''; if(f)handleReceiptImage(f)};
+async function handleShared(){
+  try{
+    const c=await caches.open('share'); const im=await c.match('img'); const tx=await c.match('txt');
+    const text=tx?await tx.text():''; const blob=im?await im.blob():null;
+    await caches.delete('share');
+    if(blob&&blob.size)return handleReceiptImage(blob);
+    if(text.trim())return fuelFromReceipt(parseReceipt(text));
+  }catch(e){}
 }
 
 /* ===== 설정 ===== */
@@ -576,6 +656,7 @@ setInterval(()=>{if(!document.hidden)doSync()},90000);
   const m=location.hash.match(/#setup=(.+)$/);
   if(m){ try{const o=JSON.parse(decodeURIComponent(escape(atob(m[1]))));S.conn.url=o.u;S.conn.key=o.k;save();history.replaceState(null,'',location.pathname);setTimeout(()=>toast('공유 설정이 완료됐어요'),400)}catch(e){} }
   render(); doSync();
+  if(/[?&]shared=1/.test(location.search)){ history.replaceState(null,'',location.pathname); handleShared(); }
   if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>
